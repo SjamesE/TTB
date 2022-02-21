@@ -113,5 +113,15 @@ namespace Chess
             squares[62].Piece = Piece.BKnight;
             squares[63].Piece = Piece.BRook;
         }
+
+        public void MovePiece(Vector2Int origin, Vector2Int target)
+        {
+            int originIndex = origin.y * 8 + origin.x;
+            int targetIndex = target.y * 8 + target.x;
+            Piece originPiece = squares[originIndex].Piece;
+
+            squares[originIndex].Piece = Piece.none;
+            squares[targetIndex].Piece = originPiece;
+        }
     }
 }

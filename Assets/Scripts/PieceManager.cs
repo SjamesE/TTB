@@ -7,11 +7,8 @@ namespace Chess
     public class PieceManager : MonoBehaviour
     {
         public GameObject parent;
-        public GameObject origin;
-        [Range(1f, 2f)]
-        public float pieceSize = 1;
 
-        Table table;
+        public Table table { get; private set; }
         public Object prefab;
 
         // Start is called before the first frame update
@@ -19,12 +16,6 @@ namespace Chess
         {
             table = new Table();
             CreatePieces();
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
         }
 
         /// <summary>
@@ -47,17 +38,19 @@ namespace Chess
 
                 // Set the image's sprite
                 Sprite sprite = table.textures[(int)square.Piece];
-                gameObject.GetComponent<Image>().sprite = sprite;
+                gameObject.GetComponent<SpriteRenderer>().sprite = sprite;
 
                 // Set it's position and size
                 Vector3 newPos = new Vector3(square.Position.x * 120 + 60, square.Position.y * 120 + 60);
                 gameObject.GetComponent<RectTransform>().localPosition = newPos;
-                Vector2 newSize = sprite.textureRect.size * pieceSize;
-                gameObject.GetComponent<RectTransform>().sizeDelta = newSize;
 
                 Vector2 parentSize = GetComponentInParent<RectTransform>().sizeDelta;
-                Vector2 padding = -new Vector2(Mathf.Abs((parentSize.x / 8 - newSize.x) / 2), Mathf.Abs((parentSize.y / 8 - newSize.y) / 2));
-                gameObject.GetComponent<Image>().raycastPadding = new Vector4(padding.x, padding.y, padding.x, padding.y);
+                gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(parentSize.x / 8, parentSize.x / 8);
+
+                // Image alpha set to 0
+                Color color = gameObject.GetComponent<Image>().color;
+                color.a = 0f;
+                gameObject.GetComponent<Image>().color = color;
 
                 // Increase the index
                 index++;
