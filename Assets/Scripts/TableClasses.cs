@@ -118,6 +118,7 @@ namespace Chess
         {
             int originIndex = origin.y * 8 + origin.x;
             int targetIndex = target.y * 8 + target.x;
+            Debug.Log(originIndex + " || " + targetIndex);
             Piece originPiece = squares[originIndex].Piece;
 
             squares[originIndex].Piece = Piece.none;

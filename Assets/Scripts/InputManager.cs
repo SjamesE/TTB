@@ -31,7 +31,7 @@ namespace Chess
                         isDragging = true;
                         objectDragged = obj.gameObject;
                         lastMousePos = Input.mousePosition;
-                        originalTransform = obj.gameObject.GetComponent<RectTransform>().position;
+                        originalTransform = obj.gameObject.GetComponent<RectTransform>().localPosition;
                         obj.gameObject.GetComponent<SpriteRenderer>().sortingOrder = 2;
                     }
                 }
@@ -40,29 +40,32 @@ namespace Chess
 
             if (!isDragging) return;
 
-            // Update lastMousePos if the left click is still clicked
-            if (Input.GetMouseButton(0))
-            {
-                lastMousePos = Input.mousePosition;
-                return;
-            }
+            // Update lastMousePos
+            lastMousePos = Input.mousePosition;
 
             // Check if Left click was released
             if (Input.GetMouseButtonUp(0))
             {
                 GameObject gameObj = objectDragged.gameObject;
                 RectTransform rt = objectDragged.GetComponent<RectTransform>();
-                Vector2 tableSize = GameObject.FindGameObjectWithTag("Table").transform.position;
-                if (rt.position.x < 0 || rt.position.y < 0 || rt.position.x > tableSize.x || rt.position.y > tableSize.y)
+                Vector2 pos = rt.localPosition;
+                Vector2 tableSize = GameObject.FindGameObjectWithTag("Table").GetComponent<RectTransform>().sizeDelta;
+                if (pos.x > 0 && pos.y > 0 && pos.x < tableSize.x && pos.y < tableSize.y)
                 {
-                    objectDragged.gameObject.GetComponent<RectTransform>().position = originalTransform;
+                    Debug.Log("Inside");
+                    Table table = GameObject.FindGameObjectWithTag("PieceManager").GetComponent<PieceManager>().table;
+
+                    Vector2Int newSquare = GetSquareIndex(pos);
+                    PieceManager pm = GameObject.FindGameObjectWithTag("PieceManager").GetComponent<PieceManager>();
+                    pm.table.MovePiece(GetSquareIndex(originalTransform), newSquare);
+                    rt.localPosition = new Vector3(newSquare.x * 120 + 60, newSquare.y * 120 + 60);
                 }
                 else
                 {
-                    Table table = GameObject.FindGameObjectWithTag("PieceManager").GetComponent<PieceManager>().table;
-                    GetSquareIndex(rt.position);
+                    rt.localPosition = originalTransform;
                 }
                 gameObj.GetComponent<SpriteRenderer>().sortingOrder = 1;
+
                 isDragging = false;
                 objectDragged = null;
                 originalTransform = new Vector3();
@@ -71,10 +74,11 @@ namespace Chess
 
         private Vector2Int GetSquareIndex(Vector2 position)
         {
-            Vector2 tableSize = GameObject.FindGameObjectWithTag("Table").transform.position;
-            float x = tableSize.x % (tableSize.x / 8);
-            float y = tableSize.y % (tableSize.y / 8);
-            return new Vector2Int(Mathf.FloorToInt(x), Mathf.FloorToInt(y));
+            Vector2 tableSize = GameObject.FindGameObjectWithTag("Table").GetComponent<RectTransform>().sizeDelta;
+            int x = Mathf.FloorToInt(position.x / (tableSize.x / 8f));
+            int y = Mathf.FloorToInt(position.y / (tableSize.y / 8f));
+            //Debug.Log($"X: {x} = {position.x} / 120, Y: {y} = {position.y} / 120 ");
+            return new Vector2Int(x, y);
         }
 
         private void UpdateDrag()
